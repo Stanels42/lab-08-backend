@@ -1,31 +1,40 @@
 'use strict';
 
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 const superagent = require('superagent');
+const pg = require('pg');
+
+const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => {console.log('database error');throw err;});
 
 const app = express();
-
 app.use(cors());
-const PORT = process.env.PORT || 3003;
 
-app.listen(PORT, () => console.log(`App is on port ${PORT}`));
+const PORT = process.env.PORT || 3003;
 
 //Get the location and name to be used else where
 app.get('/location', (request, response) => {
   const location = request.query.data;
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GEOCODE_API_KEY}`;
+  console.log(location);
+  var lookupResult = locationLookup(location).then( () => {
+    console.log(lookupResult);
+    response.status(200).json(lookupResult);
 
-  superagent.get(url)
-    .then(data => {
-      const city = new City(location, data.body);
-      response.send(city);
-    })
-    .catch(error => {
-      response.send(error).status(500);
-    });
+  });
+  // const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GEOCODE_API_KEY}`;
+  // superagent.get(url)
+  //   .then(data => {
+  //     const city = new City(location, data.body);
+  //     response.send(city);
+  //   })
+  //   .catch(error => {
+  //     response.send(error).status(500);
+  //   });
 });
+
 
 //Create an array of the weather and return that to the webpage
 app.get('/weather', (request, response) => {
@@ -96,7 +105,7 @@ app.get('*', (request, responce) => {
 
 /**
  * End of Path Functions
- * 
+ *
  * Start Helper Functions
  */
 
@@ -130,3 +139,25 @@ function Trail(trailData) {
   this.condition_date = trailData.conditionDate.slice(0,space);
   this.condition_time = trailData.conditionDate.slice(space);
 }
+
+//Check id location name is in the data base of location names return bool
+async function locationLookup (locationName) {
+  locationName = 'seattle';
+  const sqlQuery = 'SELECT * FROM locations WHERE location_name = $1';
+  const input = [locationName];
+  client.query(sqlQuery, input)
+    .then(data => {
+      console.log(data.rows);
+      return data;
+    })
+    .catch( () => {
+      console.log('error');
+      return locationName;
+    });
+}
+
+client.connect()
+  .then( () => {
+    app.listen(PORT, () => console.log(`App is on port ${PORT}`));
+  })
+  .catch( err => console.log(err));

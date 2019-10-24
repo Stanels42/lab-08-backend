@@ -1,10 +1,13 @@
 # lab-07-backend
 The implantation of API keys into our server code
 
+# lob-08-backend
+Adding SQL database storage to the backend of the project
+
 # Project Name
 
 **Author**: Chris Stanley and Ting Luo
-**Version**: 1.1.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.2.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 Provide a dashboard that provides info about the location that the user inputs.
@@ -22,6 +25,7 @@ Node.js that handles different URL calls - each returning unique dataset from di
 
 ## Credits and Collaborations
 Authors: Chris Stanley and Ting Luo
+Further Work By: Chris Stanley
 Various APIs documents. 
 
 Feature 1 Add .map()
