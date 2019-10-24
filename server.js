@@ -19,11 +19,11 @@ const PORT = process.env.PORT || 3003;
 app.get('/location', (request, response) => {
   const location = request.query.data;
   console.log(location);
-  var lookupResult = locationLookup(location).then( () => {
-    console.log(lookupResult);
-    response.status(200).json(lookupResult);
-
-  });
+  locationLookup(location)
+    .then( () => {
+      console.log(lookupResult);
+      response.status(200).json(lookupResult);
+    });
   // const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GEOCODE_API_KEY}`;
   // superagent.get(url)
   //   .then(data => {
@@ -160,4 +160,4 @@ client.connect()
   .then( () => {
     app.listen(PORT, () => console.log(`App is on port ${PORT}`));
   })
-  .catch( err => console.log(err));
+  .catch( err => console.error(err));
