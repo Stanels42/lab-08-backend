@@ -18,21 +18,17 @@ const PORT = process.env.PORT || 3003;
 //Get the location and name to be used else where
 app.get('/location', (request, response) => {
   const location = request.query.data;
-  console.log(location);
-  locationLookup(location)
-    .then( () => {
-      console.log(lookupResult);
-      response.status(200).json(lookupResult);
+  // console.log(location);
+  // locationLookup(location, response);
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GEOCODE_API_KEY}`;
+  superagent.get(url)
+    .then(data => {
+      const city = new City(location, data.body);
+      response.send(city);
+    })
+    .catch(error => {
+      response.send(error).status(500);
     });
-  // const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=${process.env.GEOCODE_API_KEY}`;
-  // superagent.get(url)
-  //   .then(data => {
-  //     const city = new City(location, data.body);
-  //     response.send(city);
-  //   })
-  //   .catch(error => {
-  //     response.send(error).status(500);
-  //   });
 });
 
 
@@ -59,24 +55,24 @@ app.get('/weather', (request, response) => {
 });
 
 
-// app.get('/yelp', (request, response) => {
+app.get('/yelp', (request, response) => {
 
-//   const currentCity = request.query.data;
-//   const url = `https://api.yelp.com/v3/businesses/search?location=${currentCity.location}`;
+  const currentCity = request.query.data;
+  const url = `https://api.yelp.com/v3/businesses/search?location=${currentCity.location}`;
 
-//   superagent.get(url)
-//     .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-//     .then(data => {
+  superagent.get(url)
+    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+    .then(data => {
 
-//       response.send(data.body);
-//     })
-//     .catch(error => {
+      response.send(data.body);
+    })
+    .catch(error => {
 
-//       console.error(error);
-//       response.send(error).status(500);
+      console.error(error);
+      response.send(error).status(500);
 
-//     });
-// });
+    });
+});
 
 //Create an array of the trails and return that to the webpage
 app.get('/trails', (request, response) => {
@@ -109,14 +105,14 @@ app.get('*', (request, responce) => {
  * Start Helper Functions
  */
 
-function City(location, data) {
+const City = function (location, data) {
 
   this.search_query = location;
   this.formatted_query = data.results[0].formatted_address;
   this.latitude = data.results[0].geometry.location.lat;
   this.longitude = data.results[0].geometry.location.lng;
 
-}
+};
 
 function Forcast(day) {
 
@@ -126,7 +122,8 @@ function Forcast(day) {
 
 }
 
-function Trail(trailData) {
+let Trial = function (trailData) {
+
   this.name = trailData.name;
   this.location = trailData.location;
   this.length = trailData.length;
@@ -138,21 +135,21 @@ function Trail(trailData) {
   let space = trailData.conditionDate.indexOf(' ');
   this.condition_date = trailData.conditionDate.slice(0,space);
   this.condition_time = trailData.conditionDate.slice(space);
-}
+
+};
 
 //Check id location name is in the data base of location names return bool
-async function locationLookup (locationName) {
+function locationLookup (locationName, response) {
   locationName = 'seattle';
-  const sqlQuery = 'SELECT * FROM locations WHERE location_name = $1';
+  const sqlQuery = 'SELECT * FROM locations WHERE search_query = $1';
   const input = [locationName];
   client.query(sqlQuery, input)
     .then(data => {
       console.log(data.rows);
-      return data;
+      response.json(data.rows);
     })
     .catch( () => {
       console.log('error');
-      return locationName;
     });
 }
 
