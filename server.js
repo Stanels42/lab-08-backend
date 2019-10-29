@@ -75,24 +75,24 @@ app.get('/weather', (request, response) => {
 });
 
 
-app.get('/yelp', (request, response) => {
+// app.get('/yelp', (request, response) => {
 
-  const currentCity = request.query.data;
-  const url = `https://api.yelp.com/v3/businesses/search?location=${currentCity.location}`;
+//   const currentCity = request.query.data;
+//   const url = `https://api.yelp.com/v3/businesses/search?location=${currentCity.location}`;
 
-  superagent.get(url)
-    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-    .then(data => {
+//   superagent.get(url)
+//     .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+//     .then(data => {
 
-      response.send(data.body);
-    })
-    .catch(error => {
+//       response.send(data.body);
+//     })
+//     .catch(error => {
 
-      console.error(error);
-      response.send(error).status(500);
+//       console.error(error);
+//       response.send(error).status(500);
 
-    });
-});
+//     });
+// });
 
 //Create an array of the trails and return that to the webpage
 app.get('/trails', (request, response) => {
